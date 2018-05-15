@@ -1,0 +1,92 @@
+---
+title: "predAssgmt"
+author: "BalajiK"
+date: "May 14, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Data preparation
+
+```{r}
+# Download the data
+# Data source credits :  http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har.
+
+# training <- data.frame(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"),na.strings=c("NA","#DIV/0!",""), header=TRUE))
+
+# testing <- data.frame(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"),na.strings=c("NA","#DIV/0!",""), header=TRUE))
+
+Raw_testing <- data.frame(read.csv("C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-testing.csv", na.strings = c("NA","#DIV/0!",""), header = TRUE))
+
+Raw_training <- data.frame(read.csv("C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-training.csv", na.strings = c("NA","#DIV/0!",""), header = TRUE))
+
+```
+
+### Many of the columns in the testing dataset are having NA's.  Hence these can be omitted to make the dataset compact. 
+
+### 2. Data Cleansing
+```{R}
+
+testing <- (Raw_testing[,colSums(is.na(Raw_testing)) == 0])
+training <- (Raw_training[,colSums(is.na(Raw_training)) == 0])
+
+dim(testing); dim(training)
+```
+
+### The first 7 columns in the testing & training datasets does not seem very relevant as they contain primarily timestamp/metadata information.  Hence they can be eliminated for model fitting.
+
+```{R}
+clean_testing <- testing[,8:60]
+clean_training <- training[,8:60]
+
+dim(clean_testing); dim(clean_training)
+
+```
+
+```{r}
+summary(clean_training$classe)
+```
+
+### The summary function output reveals there are 5 variations of "Classe" variable.  Hence various Clustering algorithms shall be tried out here.. Shall be using the caret package to create Data partitions and run the various algorithms
+
+### 3. Data Partitioning
+
+```{R}
+library(caret)
+set.seed(51518)
+
+intrain <- createDataPartition(clean_training$classe,p = 0.6, list = FALSE)
+part1_training <- clean_training[intrain,]
+part2_training <- clean_training[-intrain,]
+```
+### 4. Model fitting
+
+### Have chosen to try 2 models using rpart and lda algorithms and see which one's performing better. (Other algorithms like Randomforest,multinom etc was taking awefully long time and hence have not considered that.)
+
+```{R}
+set.seed(51518)
+
+fit_rpart <- train(classe ~., part1_training, method = "rpart")
+fit_lda <- train(classe ~., part1_training, method = "lda")
+# fit_ada <- train(classe ~., part1_training, method = "ada")
+
+```
+
+### 5. Model Validation
+
+### Now these models shall be applied to part2 of the training dataset and validated for the accuracies.
+
+```{R}
+pred_rpart <- predict(fit_rpart, part2_training)
+pred_lda <- predict(fit_lda, part2_training)
+
+conf_mtrx_rpart <- confusionMatrix(pred_rpart,part2_training$classe)
+conf_mtrx_lda <- confusionMatrix(pred_lda,part2_training$classe)
+
+conf_mtrx_rpart$overall
+conf_mtrx_lda$overall
+```
+### It looks like the accuracy is relatively lower for both the models, more so for the "lda"" based model.  Hence, another model like Randomforest is being tried.
