@@ -126,18 +126,22 @@ $(document).ready(function () {
 </div>
 
 
+<div id="objective" class="section level2">
+<h2>Objective</h2>
+<p>To develop a machine learning algorithm based model to predict the “Classe” variable based on a set of predictor variables. The data is related to personal workout activities and from related monitoring systems.</p>
+</div>
 <div id="data-preparation" class="section level2">
 <h2>1. Data preparation</h2>
 <pre class="r"><code># Download the data
 # Data source credits :  http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har.
 
-# training &lt;- data.frame(read.csv(url(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;),na.strings=c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header=TRUE))
+Raw_training &lt;- data.frame(read.csv(url(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;),na.strings=c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header=TRUE))
 
-# testing &lt;- data.frame(read.csv(url(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;),na.strings=c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header=TRUE))
+Raw_testing &lt;- data.frame(read.csv(url(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;),na.strings=c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header=TRUE))
 
-Raw_testing &lt;- data.frame(read.csv(&quot;C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-testing.csv&quot;, na.strings = c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header = TRUE))
+# Raw_testing &lt;- data.frame(read.csv(&quot;C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-testing.csv&quot;, na.strings = c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header = TRUE))
 
-Raw_training &lt;- data.frame(read.csv(&quot;C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-training.csv&quot;, na.strings = c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header = TRUE))</code></pre>
+# Raw_training &lt;- data.frame(read.csv(&quot;C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-training.csv&quot;, na.strings = c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;), header = TRUE))</code></pre>
 <div id="many-of-the-columns-in-the-testing-dataset-are-having-nas.-hence-these-can-be-omitted-to-make-the-dataset-compact." class="section level3">
 <h3>Many of the columns in the testing dataset are having NA’s. Hence these can be omitted to make the dataset compact.</h3>
 </div>
@@ -168,9 +172,26 @@ dim(clean_testing); dim(clean_training)</code></pre>
 <div id="data-partitioning" class="section level3">
 <h3>3. Data Partitioning</h3>
 <pre class="r"><code>library(caret)</code></pre>
-<pre><code>## Warning: package 'caret' was built under R version 3.4.4</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Warning: replacing previous import by 'plyr::ddply' when loading 'caret'</code></pre>
+<pre><code>## Warning: replacing previous import by 'tidyr::%&gt;%' when loading 'broom'</code></pre>
+<pre><code>## Warning: replacing previous import by 'tidyr::gather' when loading 'broom'</code></pre>
+<pre><code>## Warning: replacing previous import by 'tidyr::spread' when loading 'broom'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::!!' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::expr' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::f_lhs' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::f_rhs' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::is_empty' when loading
+## 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::lang' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::na_dbl' when loading
+## 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::names2' when loading
+## 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::quos' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::sym' when loading 'recipes'</code></pre>
+<pre><code>## Warning: replacing previous import by 'rlang::syms' when loading 'recipes'</code></pre>
 <pre class="r"><code>set.seed(51518)
 
 intrain &lt;- createDataPartition(clean_training$classe,p = 0.6, list = FALSE)
@@ -180,13 +201,13 @@ part2_training &lt;- clean_training[-intrain,]</code></pre>
 <div id="model-fitting" class="section level3">
 <h3>4. Model fitting</h3>
 </div>
-<div id="have-chosen-to-try-2-models-using-rpart-and-lda-algorithms-and-see-which-ones-performing-better.-other-algorithms-like-randomforestmultinom-etc-was-taking-awefully-long-time-and-hence-have-not-considered-that." class="section level3">
-<h3>Have chosen to try 2 models using rpart and lda algorithms and see which one’s performing better. (Other algorithms like Randomforest,multinom etc was taking awefully long time and hence have not considered that.)</h3>
+<div id="have-chosen-to-try-3-models-using-rpart-lda-and-randomforest-algorithms-and-see-which-ones-performing-better." class="section level3">
+<h3>Have chosen to try 3 models using rpart, lda and randomForest algorithms and see which one’s performing better.</h3>
 <pre class="r"><code>set.seed(51518)
 
 fit_rpart &lt;- train(classe ~., part1_training, method = &quot;rpart&quot;)
 fit_lda &lt;- train(classe ~., part1_training, method = &quot;lda&quot;)
-# fit_ada &lt;- train(classe ~., part1_training, method = &quot;ada&quot;)</code></pre>
+fit_rf &lt;- train(classe ~., part1_training, method = &quot;rf&quot;)</code></pre>
 </div>
 <div id="model-validation" class="section level3">
 <h3>5. Model Validation</h3>
@@ -195,9 +216,11 @@ fit_lda &lt;- train(classe ~., part1_training, method = &quot;lda&quot;)
 <h3>Now these models shall be applied to part2 of the training dataset and validated for the accuracies.</h3>
 <pre class="r"><code>pred_rpart &lt;- predict(fit_rpart, part2_training)
 pred_lda &lt;- predict(fit_lda, part2_training)
+pred_rf &lt;- predict(fit_rf, part2_training)
 
 conf_mtrx_rpart &lt;- confusionMatrix(pred_rpart,part2_training$classe)
 conf_mtrx_lda &lt;- confusionMatrix(pred_lda,part2_training$classe)
+conf_mtrx_rf &lt;- confusionMatrix(pred_rf,part2_training$classe)
 
 conf_mtrx_rpart$overall</code></pre>
 <pre><code>##       Accuracy          Kappa  AccuracyLower  AccuracyUpper   AccuracyNull 
@@ -209,9 +232,23 @@ conf_mtrx_rpart$overall</code></pre>
 ##   7.062197e-01   6.281097e-01   6.960020e-01   7.162841e-01   2.844762e-01 
 ## AccuracyPValue  McnemarPValue 
 ##   0.000000e+00   4.673995e-83</code></pre>
+<pre class="r"><code>conf_mtrx_rf$overall</code></pre>
+<pre><code>##       Accuracy          Kappa  AccuracyLower  AccuracyUpper   AccuracyNull 
+##      0.9905684      0.9880696      0.9881738      0.9925871      0.2844762 
+## AccuracyPValue  McnemarPValue 
+##      0.0000000            NaN</code></pre>
 </div>
-<div id="it-looks-like-the-accuracy-is-relatively-lower-for-both-the-models-more-so-for-the-lda-based-model.-hence-another-model-like-randomforest-is-being-tried." class="section level3">
-<h3>It looks like the accuracy is relatively lower for both the models, more so for the “lda”&quot; based model. Hence, another model like Randomforest is being tried.</h3>
+<div id="comparing-the-accuracies-from-the-various-models-it-is-observed-that-random-forest-algorithm-based-model-gives-a-better-accuracy-of-98.9-compared-to-rpart-49-and-lda70-algorithm-based-models." class="section level3">
+<h3>Comparing the accuracies from the various models, it is observed that Random Forest algorithm based model gives a better accuracy of 98.9 % compared to rpart (49 %) and lda(70 %) algorithm based models.</h3>
+</div>
+<div id="model-application" class="section level3">
+<h3>6. Model Application</h3>
+<p>NOw, as the final step, the chosen model can be applied on the actual test data set to predict the target feature.</p>
+<pre class="r"><code>pred_rf_newdata &lt;- predict(fit_rf, clean_testing)</code></pre>
+</div>
+<div id="conclusion" class="section level3">
+<h3>7. Conclusion</h3>
+<p>It is hence concluded that the RF algorithm based model could be used for this prediction use case as it gives the maximum accuracy.</p>
 </div>
 </div>
 

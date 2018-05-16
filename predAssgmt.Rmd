@@ -8,6 +8,9 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Objective
+
+To develop a machine learning algorithm based model to predict the "Classe" variable based on a set of predictor variables. The data is related to personal workout activities and from related monitoring systems. 
 
 ## 1. Data preparation
 
@@ -15,13 +18,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # Download the data
 # Data source credits :  http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har.
 
-# training <- data.frame(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"),na.strings=c("NA","#DIV/0!",""), header=TRUE))
+Raw_training <- data.frame(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"),na.strings=c("NA","#DIV/0!",""), header=TRUE))
 
-# testing <- data.frame(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"),na.strings=c("NA","#DIV/0!",""), header=TRUE))
+Raw_testing <- data.frame(read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"),na.strings=c("NA","#DIV/0!",""), header=TRUE))
 
-Raw_testing <- data.frame(read.csv("C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-testing.csv", na.strings = c("NA","#DIV/0!",""), header = TRUE))
+# Raw_testing <- data.frame(read.csv("C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-testing.csv", na.strings = c("NA","#DIV/0!",""), header = TRUE))
 
-Raw_training <- data.frame(read.csv("C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-training.csv", na.strings = c("NA","#DIV/0!",""), header = TRUE))
+# Raw_training <- data.frame(read.csv("C:/Users/balaji_krishnaiyer/Documents/R/Coursera/ML/pml-training.csv", na.strings = c("NA","#DIV/0!",""), header = TRUE))
 
 ```
 
@@ -64,14 +67,14 @@ part2_training <- clean_training[-intrain,]
 ```
 ### 4. Model fitting
 
-### Have chosen to try 2 models using rpart and lda algorithms and see which one's performing better. (Other algorithms like Randomforest,multinom etc was taking awefully long time and hence have not considered that.)
+### Have chosen to try 3 models using rpart, lda and randomForest algorithms and see which one's performing better. 
 
 ```{R}
 set.seed(51518)
 
 fit_rpart <- train(classe ~., part1_training, method = "rpart")
 fit_lda <- train(classe ~., part1_training, method = "lda")
-# fit_ada <- train(classe ~., part1_training, method = "ada")
+fit_rf <- train(classe ~., part1_training, method = "rf")
 
 ```
 
@@ -82,11 +85,26 @@ fit_lda <- train(classe ~., part1_training, method = "lda")
 ```{R}
 pred_rpart <- predict(fit_rpart, part2_training)
 pred_lda <- predict(fit_lda, part2_training)
+pred_rf <- predict(fit_rf, part2_training)
 
 conf_mtrx_rpart <- confusionMatrix(pred_rpart,part2_training$classe)
 conf_mtrx_lda <- confusionMatrix(pred_lda,part2_training$classe)
+conf_mtrx_rf <- confusionMatrix(pred_rf,part2_training$classe)
 
 conf_mtrx_rpart$overall
 conf_mtrx_lda$overall
+conf_mtrx_rf$overall
 ```
-### It looks like the accuracy is relatively lower for both the models, more so for the "lda"" based model.  Hence, another model like Randomforest is being tried.
+### Comparing the accuracies from the various models, it is observed that Random Forest algorithm based model gives a better accuracy of 98.9 % compared to rpart (49 %) and lda(70 %) algorithm based models.
+
+### 6. Model Application
+
+NOw, as the final step, the chosen model can be applied on the actual test data set to predict the target feature.
+
+```{R}
+pred_rf_newdata <- predict(fit_rf, clean_testing)
+```
+
+### 7. Conclusion
+
+It is hence concluded that the RF algorithm based model could be used for this prediction use case as it gives the maximum accuracy.
